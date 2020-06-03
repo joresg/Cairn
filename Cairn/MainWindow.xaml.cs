@@ -35,6 +35,7 @@ namespace Cairn
             //Items = loadDirs(GetSubdir(source_dir));
             collectionObject = new DirList();
             ListDir.ItemsSource = collectionObject;
+            DirFull.Text = collectionObject.source_dir;
         }
 
         #region INotifyPropertyChanged Members
@@ -60,14 +61,16 @@ namespace Cairn
             dynamic Name = ListDir.SelectedItem as dynamic;
             string selected_dir = Name.DirName;
             collectionObject.loadDirs(selected_dir);
+            DirFull.Text = collectionObject.source_dir;
         }
 
         private void dirGoBack(object sender, RoutedEventArgs e)
         {
             collectionObject.dirGoBack();
+            DirFull.Text = collectionObject.source_dir;
         }
     }
-    public class DirList : ObservableCollection<Dir>
+    public class DirList : ObservableCollection<Dir>, INotifyPropertyChanged
     {
         public string source_dir { get; set; }
         public DirList() : base()
@@ -75,7 +78,8 @@ namespace Cairn
             source_dir = @"C:\Users\jores\Desktop";
             foreach (string dir_name in GetSubdir(source_dir))
             {
-                Add(new Dir(dir_name));
+                string[] file_name_only = dir_name.Split('\\'); 
+                Add(new Dir(file_name_only[file_name_only.Length-1]));
             }
         }
         public void loadDirs(string selected_dir)
@@ -93,7 +97,8 @@ namespace Cairn
                     Clear();
                     foreach (string dir_name in get_subdir)
                     {
-                        Add(new Dir(dir_name));
+                        string[] file_name_only = dir_name.Split('\\'); 
+                        Add(new Dir(file_name_only[file_name_only.Length-1]));
                     }
                     source_dir = new_dir;
                 }

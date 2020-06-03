@@ -7,13 +7,18 @@
         mc:Ignorable="d"
         Title="Cairn" Height="720" Width="1280">
     <Grid>
-        <ListBox Name="ListDir" SelectionMode="Extended">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="20*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Name ="DirFull" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding DirName}"/>
+        <Button Margin ="5,0,0,0" Grid.Row ="0" HorizontalAlignment="Left" VerticalAlignment="Center" Click="dirGoBack">back</Button>
+        <ListBox Grid.Row ="1" Name="ListDir" SelectionMode="Extended">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding DirName}" MouseUp="SelectDir"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <Button HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="dirGoBack">back</Button>
     </Grid>
 </Window>
