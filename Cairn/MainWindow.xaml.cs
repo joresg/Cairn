@@ -82,15 +82,20 @@ namespace Cairn
         {
             if(Directory.Exists(System.IO.Path.Combine(source_dir, selected_dir)))
             {
-                Clear();
-                Console.WriteLine($"selected dir: {selected_dir}");
-                Console.WriteLine($"old dir: {source_dir}");
+                //Console.WriteLine($"selected dir: {selected_dir}");
+                //Console.WriteLine($"old dir: {source_dir}");
                 string[] sd_split = selected_dir.Split('\\');
-                source_dir = System.IO.Path.Combine(source_dir, sd_split[sd_split.Length - 1]);
-                Console.WriteLine($"new dir: {source_dir}");
-                foreach (string dir_name in GetSubdir(source_dir))
+                string new_dir = System.IO.Path.Combine(source_dir, sd_split[sd_split.Length - 1]);
+                //Console.WriteLine($"new dir: {source_dir}");
+                var get_subdir = GetSubdir(new_dir);
+                if(get_subdir != null)
                 {
-                    Add(new Dir(dir_name));
+                    Clear();
+                    foreach (string dir_name in get_subdir)
+                    {
+                        Add(new Dir(dir_name));
+                    }
+                    source_dir = new_dir;
                 }
             }
             else
@@ -121,19 +126,36 @@ namespace Cairn
         public string[] GetSubdir(string source_dir)
         {
             //string source_dir = @"C:\Users\joresg\Desktop";
-            string[] files = System.IO.Directory.GetFiles(source_dir);
-            string[] directories = System.IO.Directory.GetDirectories(source_dir);
-            string[] filesanddirs = new string[files.Length + directories.Length];
-            int x = 0;
-            foreach (string file in files)
+            string[] filesanddirs = null ;
+            try
             {
-                filesanddirs[x] = file;
-                x++;
+                string[] files = System.IO.Directory.GetFiles(source_dir);
+                string[] directories = System.IO.Directory.GetDirectories(source_dir);
+                filesanddirs = new string[files.Length + directories.Length];
+                int x = 0;
+                foreach (string file in files)
+                {
+                    filesanddirs[x] = file;
+                    x++;
+                }
+                foreach (string dir in directories)
+                {
+                    filesanddirs[x] = dir;
+                    x++;
+                }
             }
-            foreach (string dir in directories)
+            catch (UnauthorizedAccessException)
             {
-                filesanddirs[x] = dir;
-                x++;
+                FileAttributes attr = (new FileInfo(source_dir)).Attributes;
+                Console.Write("UnAuthorizedAccessException: Unable to access file. ");
+                WindowError win = new WindowError("Access Denied.");
+                win.Show();
+                if ((attr & FileAttributes.ReadOnly) > 0)
+                    Console.Write("The file is read-only.");
+            }
+            finally
+            {
+                //TODO
             }
             //return files;
             return filesanddirs;

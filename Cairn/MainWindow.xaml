@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Cairn"
         mc:Ignorable="d"
-        Title="Cairn" Height="450" Width="800">
+        Title="Cairn" Height="720" Width="1280">
     <Grid>
         <ListBox Name="ListDir" SelectionMode="Extended">
             <ListBox.ItemTemplate>
