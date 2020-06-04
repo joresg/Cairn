@@ -16,6 +16,9 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Windows.Threading;
+using System.Collections.Specialized;
 
 namespace Cairn
 {
@@ -27,7 +30,6 @@ namespace Cairn
         public List<Dir> Items { get; set; }
         public string dir_name { get; set; }
         public DirList collectionObject { get; set; }
-
         public MainWindow()
         {
             InitializeComponent();
@@ -73,9 +75,55 @@ namespace Cairn
     public class DirList : ObservableCollection<Dir>, INotifyPropertyChanged
     {
         public string source_dir { get; set; }
+        public Thread threadWatcher { get; set; }
         public DirList() : base()
         {
-            source_dir = @"C:\Users\jores\Desktop";
+            //source_dir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            source_dir = Environment.GetEnvironmentVariable("userprofile");
+            //Console.WriteLine($"starting dir: {source_dir}");
+            foreach (string dir_name in GetSubdir(source_dir))
+            {
+                string[] file_name_only = dir_name.Split('\\'); 
+                Add(new Dir(file_name_only[file_name_only.Length-1]));
+            }
+            Reloader objectToSubscribeTo = new Reloader();
+            objectToSubscribeTo.directoryChange += directoryChange;
+            threadWatcher = new Thread(new ThreadStart(fwRun));
+            threadWatcher.Start();
+        }
+        public void directoryChange(object sender, EventArgs e) {
+            reloadDirs();
+        }
+
+
+        /*
+        public override event NotifyCollectionChangedEventHandler CollectionChanged;
+        protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e) {
+            var eh = CollectionChanged;
+            if (eh != null) {
+                System.Windows.Threading.Dispatcher dispatcher = (from System.Collections.Specialized.NotifyCollectionChangedEventHandler nh in eh.GetInvocationList()
+                                         let dpo = nh.Target as System.Windows.Threading.DispatcherObject
+                                                                  where dpo != null
+                                         select dpo.Dispatcher).FirstOrDefault();
+
+                if (dispatcher != null && dispatcher.CheckAccess() == false) {
+                    dispatcher.Invoke(DispatcherPriority.DataBind, (Action)(() => OnCollectionChanged(e)));
+                } else {
+                    foreach (NotifyCollectionChangedEventHandler nh in eh.GetInvocationList())
+                        nh.Invoke(this, e);
+                }
+            }
+        }
+        */
+
+        //wrapper for FileWatcher Run method
+        public void fwRun() {
+            Console.WriteLine($"starting watcher thread for: {source_dir}");
+            FileWatcher fw = new FileWatcher();
+            fw.Run(this, source_dir);
+        }
+        public void reloadDirs() {
+            Clear();
             foreach (string dir_name in GetSubdir(source_dir))
             {
                 string[] file_name_only = dir_name.Split('\\'); 
@@ -86,6 +134,8 @@ namespace Cairn
         {
             if(Directory.Exists(System.IO.Path.Combine(source_dir, selected_dir)))
             {
+                //kill thread watcher thread for old dir
+                threadWatcher.Abort();
                 //Console.WriteLine($"selected dir: {selected_dir}");
                 //Console.WriteLine($"old dir: {source_dir}");
                 string[] sd_split = selected_dir.Split('\\');
@@ -101,6 +151,9 @@ namespace Cairn
                         Add(new Dir(file_name_only[file_name_only.Length-1]));
                     }
                     source_dir = new_dir;
+                    //start threadwatcher for new dir
+                    threadWatcher = new Thread(new ThreadStart(fwRun));
+                    threadWatcher.Start();
                 }
             }
             else
@@ -108,7 +161,7 @@ namespace Cairn
                 Console.WriteLine("NOT A PATH, OPEN FILE");
                 System.Diagnostics.Process process = new System.Diagnostics.Process();
                 process.StartInfo.FileName = System.IO.Path.Combine(source_dir, selected_dir);
-                //process.StartInfo.Arguments = ..... //your parameters
+                //process.StartInfo.Arguments = 
                 process.Start();
             }
         }
@@ -130,7 +183,6 @@ namespace Cairn
 
         public string[] GetSubdir(string source_dir)
         {
-            //string source_dir = @"C:\Users\joresg\Desktop";
             string[] filesanddirs = null ;
             try
             {
@@ -158,10 +210,12 @@ namespace Cairn
                 if ((attr & FileAttributes.ReadOnly) > 0)
                     Console.Write("The file is read-only.");
             }
+            /*
             finally
             {
                 //TODO
             }
+            */
             //return files;
             return filesanddirs;
         }
