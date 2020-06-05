@@ -90,10 +90,17 @@
       <DependentUpon>DirRightClick.xaml</DependentUpon>
     </Compile>
     <Compile Include="FileWatcher.cs" />
+    <Compile Include="GridRightClick.xaml.cs">
+      <DependentUpon>GridRightClick.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WindowError.xaml.cs">
       <DependentUpon>WindowError.xaml</DependentUpon>
     </Compile>
     <Page Include="DirRightClick.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GridRightClick.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

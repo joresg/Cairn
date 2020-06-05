@@ -31,6 +31,7 @@ namespace Cairn
         public string dir_name { get; set; }
         public DirList collectionObject { get; set; }
         public DirRightClick dir_right_click { get; set; }
+        public GridRightClick grid_right_click { get; set; }
         public MainWindow()
         {
             InitializeComponent();
@@ -81,7 +82,14 @@ namespace Cairn
             DirFull.Text = collectionObject.source_dir;
         }
         private void GridRightClick(object sender, RoutedEventArgs e) {
-            Console.WriteLine("right click at");
+            Console.WriteLine("Grid right click.");
+            grid_right_click = new GridRightClick();
+            grid_right_click.WindowStartupLocation = WindowStartupLocation.Manual;
+            grid_right_click.Left = PointToScreen(Mouse.GetPosition(null)).X;
+            grid_right_click.Top = PointToScreen(Mouse.GetPosition(null)).Y;
+            grid_right_click.Focus();
+            grid_right_click.Show();
+
         }
         private void SubdirRightClick(object sender, RoutedEventArgs e) {
             Console.WriteLine("Right click on subdir element");
@@ -89,7 +97,7 @@ namespace Cairn
             //TextBlock[] temp = new TextBlock[((IList<TextBlock>)selected_items).Count()];
             List<string> selected_dirs = new List<string>();
             int x = 0;
-            //give it full path
+            //give all files full path and pass them to newley instantiated DirRightClick object
             foreach(Dir file in ListDir.SelectedItems) {
                 selected_dirs.Add(System.IO.Path.Combine(collectionObject.source_dir,file.DirName));
                 x++;

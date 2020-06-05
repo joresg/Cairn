@@ -25,7 +25,10 @@ namespace Cairn {
         }
         //can't have two right click windows at the same time
         protected override void OnDeactivated(EventArgs e) {
+            Console.WriteLine("DirRightClick: lost focus");
             base.OnDeactivated(e);
+            Hide();
+            Close();
         }
         private void FilesCopy(object o, RoutedEventArgs e) {
             Console.WriteLine("copying files");
@@ -34,24 +37,26 @@ namespace Cairn {
                 //TODO copy files
                 //make a structure to hold all copied files
             }
-            Close();
+            //Close();
         }
         private void FilesDelete(object o, RoutedEventArgs e) {
             Console.WriteLine("deleting files");
             foreach(string filename in selected_Dirs) {
                 Console.WriteLine($"selected item: {filename}");
                 //TODO delete files
-                try {
+                FileAttributes attr = File.GetAttributes(filename);
 
-                    if (System.IO.Directory.Exists(filename)) {
-                        File.SetAttributes(filename, FileAttributes.Normal);
-                        System.IO.File.Delete(filename);
-                    }
-                } catch(Exception exc) {
-                    Console.WriteLine($"cant delete folder: {filename}");
+                //detect whether its a directory or file
+                if ((attr & FileAttributes.Directory) == FileAttributes.Directory) {
+                    Console.WriteLine("je dir");
+                    Directory.Delete(filename, true);
+
+                } else {
+                    Console.WriteLine("je file");
+                    File.Delete(filename);
                 }
             }
-            Close();
+            //Close();
 
         }
         private void FilesPaste(object o, RoutedEventArgs e) {
