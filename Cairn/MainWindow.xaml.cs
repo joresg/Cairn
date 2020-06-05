@@ -76,6 +76,8 @@ namespace Cairn
     {
         public string source_dir { get; set; }
         public Thread threadWatcher { get; set; }
+        public Reloader _reloader { get; set; }
+        public SynchronizationContext uiContext { get; set; }
         public DirList() : base()
         {
             //source_dir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -86,9 +88,9 @@ namespace Cairn
                 string[] file_name_only = dir_name.Split('\\'); 
                 Add(new Dir(file_name_only[file_name_only.Length-1]));
             }
-            Reloader objectToSubscribeTo = new Reloader();
-            objectToSubscribeTo.directoryChange += directoryChange;
+            uiContext = SynchronizationContext.Current;
             threadWatcher = new Thread(new ThreadStart(fwRun));
+            //uiContext.Send(x => _matchObsCollection.Add(match), null);
             threadWatcher.Start();
         }
         public void directoryChange(object sender, EventArgs e) {
@@ -120,14 +122,24 @@ namespace Cairn
         public void fwRun() {
             Console.WriteLine($"starting watcher thread for: {source_dir}");
             FileWatcher fw = new FileWatcher();
-            fw.Run(this, source_dir);
+            _reloader = fw.reloader;
+            _reloader.directoryChange += directoryChange;
+            fw.Run(source_dir);
         }
         public void reloadDirs() {
-            Clear();
+            App.Current.Dispatcher.Invoke((Action)delegate {
+                Clear();
+            });
+            //Clear();
             foreach (string dir_name in GetSubdir(source_dir))
             {
                 string[] file_name_only = dir_name.Split('\\'); 
-                Add(new Dir(file_name_only[file_name_only.Length-1]));
+                //Add(new Dir(file_name_only[file_name_only.Length-1]));
+                //uiContext.Send(x => Add(new Dir(file_name_only[file_name_only.Length-1])), null);
+                App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
+                {
+                    Add(new Dir(file_name_only[file_name_only.Length - 1]));
+                });
             }
         }
         public void loadDirs(string selected_dir)
