@@ -86,10 +86,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DirRightClick.xaml.cs">
+      <DependentUpon>DirRightClick.xaml</DependentUpon>
+    </Compile>
     <Compile Include="FileWatcher.cs" />
     <Compile Include="WindowError.xaml.cs">
       <DependentUpon>WindowError.xaml</DependentUpon>
     </Compile>
+    <Page Include="DirRightClick.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

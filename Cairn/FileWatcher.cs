@@ -18,7 +18,7 @@ namespace Cairn {
             Console.WriteLine($"watcher started for {watch_path}");
             // Create a new FileSystemWatcher and set its properties.
             using (FileSystemWatcher watcher = new FileSystemWatcher()) {
-                watcher.Path = watch_path;
+                watcher.Path = $@"{watch_path}\";
 
                 // Watch for changes in LastAccess and LastWrite times, and
                 // the renaming of files or directories.

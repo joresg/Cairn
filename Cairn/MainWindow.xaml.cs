@@ -30,6 +30,7 @@ namespace Cairn
         public List<Dir> Items { get; set; }
         public string dir_name { get; set; }
         public DirList collectionObject { get; set; }
+        public DirRightClick dir_right_click { get; set; }
         public MainWindow()
         {
             InitializeComponent();
@@ -38,6 +39,9 @@ namespace Cairn
             collectionObject = new DirList();
             ListDir.ItemsSource = collectionObject;
             DirFull.Text = collectionObject.source_dir;
+
+            //dir_right_click = new DirRightClick();
+            //dir_right_click.LostFocus += CloseRightClickWin;
         }
 
         #region INotifyPropertyChanged Members
@@ -58,18 +62,44 @@ namespace Cairn
         }
         #endregion
 
-        private void SelectDir(object sender, EventArgs e)
+        private void SelectDir(object sender, MouseButtonEventArgs e)
         {
+            Console.WriteLine($"click count: {e.ClickCount}");
+            //if(e.ClickCount == 2) {
+            if (!Keyboard.IsKeyDown(Key.LeftShift) && !Keyboard.IsKeyDown(Key.LeftCtrl)) {
+            Console.WriteLine("MASK KEYS ARE NOT DOWN");
             dynamic Name = ListDir.SelectedItem as dynamic;
-            string selected_dir = Name.DirName;
-            collectionObject.loadDirs(selected_dir);
-            DirFull.Text = collectionObject.source_dir;
+                string selected_dir = Name.DirName;
+                collectionObject.loadDirs(selected_dir);
+                DirFull.Text = collectionObject.source_dir;
+            }
         }
 
         private void dirGoBack(object sender, RoutedEventArgs e)
         {
             collectionObject.dirGoBack();
             DirFull.Text = collectionObject.source_dir;
+        }
+        private void GridRightClick(object sender, RoutedEventArgs e) {
+            Console.WriteLine("right click at");
+        }
+        private void SubdirRightClick(object sender, RoutedEventArgs e) {
+            Console.WriteLine("Right click on subdir element");
+
+            //TextBlock[] temp = new TextBlock[((IList<TextBlock>)selected_items).Count()];
+            List<string> selected_dirs = new List<string>();
+            int x = 0;
+            //give it full path
+            foreach(Dir file in ListDir.SelectedItems) {
+                selected_dirs.Add(System.IO.Path.Combine(collectionObject.source_dir,file.DirName));
+                x++;
+            }
+            dir_right_click = new DirRightClick(selected_dirs);
+            dir_right_click.WindowStartupLocation = WindowStartupLocation.Manual;
+            dir_right_click.Left = PointToScreen(Mouse.GetPosition(null)).X;
+            dir_right_click.Top = PointToScreen(Mouse.GetPosition(null)).Y;
+            dir_right_click.Focus();
+            dir_right_click.Show();
         }
     }
     public class DirList : ObservableCollection<Dir>, INotifyPropertyChanged
@@ -83,20 +113,18 @@ namespace Cairn
             //source_dir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             source_dir = Environment.GetEnvironmentVariable("userprofile");
             //Console.WriteLine($"starting dir: {source_dir}");
-            foreach (string dir_name in GetSubdir(source_dir))
+            foreach (string dir_name in GetSubdir(source_dir, DirOutput.Mode.All, DirOutput.Mode_Visibility.All))
             {
                 string[] file_name_only = dir_name.Split('\\'); 
                 Add(new Dir(file_name_only[file_name_only.Length-1]));
             }
-            uiContext = SynchronizationContext.Current;
+            //uiContext = SynchronizationContext.Current;
             threadWatcher = new Thread(new ThreadStart(fwRun));
-            //uiContext.Send(x => _matchObsCollection.Add(match), null);
             threadWatcher.Start();
         }
         public void directoryChange(object sender, EventArgs e) {
             reloadDirs();
         }
-
 
         /*
         public override event NotifyCollectionChangedEventHandler CollectionChanged;
@@ -131,12 +159,12 @@ namespace Cairn
                 Clear();
             });
             //Clear();
-            foreach (string dir_name in GetSubdir(source_dir))
+            foreach (string dir_name in GetSubdir(source_dir, DirOutput.Mode.All, DirOutput.Mode_Visibility.All))
             {
                 string[] file_name_only = dir_name.Split('\\'); 
                 //Add(new Dir(file_name_only[file_name_only.Length-1]));
                 //uiContext.Send(x => Add(new Dir(file_name_only[file_name_only.Length-1])), null);
-                App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
+                App.Current.Dispatcher.Invoke((Action)delegate
                 {
                     Add(new Dir(file_name_only[file_name_only.Length - 1]));
                 });
@@ -153,7 +181,7 @@ namespace Cairn
                 string[] sd_split = selected_dir.Split('\\');
                 string new_dir = System.IO.Path.Combine(source_dir, sd_split[sd_split.Length - 1]);
                 //Console.WriteLine($"new dir: {source_dir}");
-                var get_subdir = GetSubdir(new_dir);
+                var get_subdir = GetSubdir(new_dir, DirOutput.Mode.All, DirOutput.Mode_Visibility.All);
                 if(get_subdir != null)
                 {
                     Clear();
@@ -192,12 +220,25 @@ namespace Cairn
             Console.WriteLine($"back dir: {source_dir}");
             loadDirs("");
         }
+        public static class DirOutput {
+            public enum Mode {
+                FilesOnly,
+                DirsOnly,
+                All
 
-        public string[] GetSubdir(string source_dir)
+            }
+            public enum Mode_Visibility {
+                NonHidden,
+                All
+            }
+        }
+
+        public string[] GetSubdir(string source_dir, DirOutput.Mode mode, DirOutput.Mode_Visibility mode_visibility)
         {
             string[] filesanddirs = null ;
             try
             {
+                /*
                 string[] files = System.IO.Directory.GetFiles(source_dir);
                 string[] directories = System.IO.Directory.GetDirectories(source_dir);
                 filesanddirs = new string[files.Length + directories.Length];
@@ -210,6 +251,27 @@ namespace Cairn
                 foreach (string dir in directories)
                 {
                     filesanddirs[x] = dir;
+                    x++;
+                }
+                */
+                DirectoryInfo directory = new DirectoryInfo(source_dir);
+                FileInfo[] files = directory.GetFiles();
+                DirectoryInfo[] dirs = directory.GetDirectories();
+                var files_filtered = files.Where(f => !f.Attributes.HasFlag(FileAttributes.Hidden));
+                var dirs_filtered = dirs.Where(f => !f.Attributes.HasFlag(FileAttributes.ReadOnly) || !f.Attributes.HasFlag(FileAttributes.Hidden));
+                Console.WriteLine(files_filtered.Count() + "," + dirs_filtered.Count());
+                filesanddirs = new string[files_filtered.Count()+dirs_filtered.Count()];
+                //filesanddirs = new string[files_filtered.Count()+dirs.Length];
+                int x = 0;
+                Console.WriteLine("izpisujem non hidden");
+                foreach(var file in files_filtered) {
+                    filesanddirs[x] = file.ToString();
+                    Console.WriteLine(filesanddirs[x]);
+                    x++;
+                }
+                foreach(var dir in dirs_filtered) {
+                    filesanddirs[x] = dir.ToString();
+                    Console.WriteLine(filesanddirs[x]);
                     x++;
                 }
             }

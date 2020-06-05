@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Cairn"
         mc:Ignorable="d"
         Title="Cairn" Height="720" Width="1280">
-    <Grid>
+    <Grid MouseRightButtonUp="GridRightClick">
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="20*"/>
@@ -16,7 +16,7 @@
         <ListBox Grid.Row ="1" Name="ListDir" SelectionMode="Extended">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding DirName}" MouseUp="SelectDir"/>
+                    <TextBlock FontSize="14" Text="{Binding DirName}" MouseLeftButtonUp="SelectDir" MouseRightButtonUp="SubdirRightClick"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
