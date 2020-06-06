@@ -19,6 +19,8 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Threading;
 using System.Collections.Specialized;
+using System.Configuration;
+using System.Runtime.Remoting.Channels;
 
 namespace Cairn
 {
@@ -82,8 +84,7 @@ namespace Cairn
             DirFull.Text = collectionObject.source_dir;
         }
         private void GridRightClick(object sender, RoutedEventArgs e) {
-            Console.WriteLine("Grid right click.");
-            grid_right_click = new GridRightClick();
+            grid_right_click = new GridRightClick(collectionObject.source_dir);
             grid_right_click.WindowStartupLocation = WindowStartupLocation.Manual;
             grid_right_click.Left = PointToScreen(Mouse.GetPosition(null)).X;
             grid_right_click.Top = PointToScreen(Mouse.GetPosition(null)).Y;
@@ -91,10 +92,19 @@ namespace Cairn
             grid_right_click.Show();
 
         }
-        private void SubdirRightClick(object sender, RoutedEventArgs e) {
+        private void SubdirRightClick(object sender, MouseButtonEventArgs e) {
             Console.WriteLine("Right click on subdir element");
-
-            //TextBlock[] temp = new TextBlock[((IList<TextBlock>)selected_items).Count()];
+            e.Handled = true;
+            /*
+            Console.WriteLine($"type: {sender.GetType()}");
+            //ignore parent event
+            if (sender.GetType() == typeof(Grid))
+            {
+                Console.WriteLine($"jebisimater: {sender.GetType()}");
+                return;
+            }
+            */
+            Console.WriteLine("IDEMO OTROK MOJ");
             List<string> selected_dirs = new List<string>();
             int x = 0;
             //give all files full path and pass them to newley instantiated DirRightClick object

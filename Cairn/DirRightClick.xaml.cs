@@ -56,7 +56,8 @@ namespace Cairn {
                     File.Delete(filename);
                 }
             }
-            //Close();
+            Hide(); 
+            Close();
 
         }
         private void FilesPaste(object o, RoutedEventArgs e) {

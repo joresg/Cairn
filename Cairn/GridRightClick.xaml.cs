@@ -11,14 +11,17 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.IO;
 
 namespace Cairn {
     /// <summary>
     /// Interaction logic for GridRightClick.xaml
     /// </summary>
     public partial class GridRightClick : Window {
-        public GridRightClick() {
+        public string sourceDir { get; set; }
+        public GridRightClick(string source_dir) {
             InitializeComponent();
+            sourceDir = source_dir;
         }
 
         protected override void OnDeactivated(EventArgs e) {
@@ -30,6 +33,8 @@ namespace Cairn {
 
         private void CreateDirectory(object o, EventArgs e) {
             Console.WriteLine("create directory");
+            System.IO.Directory.CreateDirectory(System.IO.Path.Combine(sourceDir,"newFolder"));
+            Hide();
             Close();
         }
     }
