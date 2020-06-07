@@ -33,7 +33,15 @@ namespace Cairn {
 
         private void CreateDirectory(object o, EventArgs e) {
             Console.WriteLine("create directory");
-            System.IO.Directory.CreateDirectory(System.IO.Path.Combine(sourceDir,"newFolder"));
+            int x = 1;
+            if(Directory.Exists(System.IO.Path.Combine(sourceDir, $"New Folder")))
+            {
+                while(Directory.Exists(System.IO.Path.Combine(sourceDir, $"New Folder ({x})")))
+                {
+                    x++;
+                }
+            }
+            System.IO.Directory.CreateDirectory(System.IO.Path.Combine(sourceDir,$"New Folder ({x})"));
             Hide();
             Close();
         }
