@@ -65,6 +65,59 @@ namespace Cairn
         }
         #endregion
 
+        public void Window_Loaded(object sender, EventArgs e)
+        {
+            EditableTextBlock textBlock = (EditableTextBlock)sender;
+            AdornerLayer.GetAdornerLayer(textBlock);
+            if (null != textBlock)
+            {
+                //Get the adorner layer of the uielement (here TextBlock)
+                AdornerLayer layer = AdornerLayer.GetAdornerLayer(textBlock);
+
+                //If the IsInEditMode set to true means the user has enabled the edit mode then
+                //add the adorner to the adorner layer of the TextBlock.
+                if (textBlock.State)
+                {
+                    if (null == textBlock._adorner)
+                    {
+                        textBlock._adorner = new EditableTextBlockAdorner(textBlock);
+
+                        //Events wired to exit edit mode when the user presses 
+                        //Enter key or leaves the control.
+                        /*
+                        textBlock._adorner.TextBoxKeyUp += textBlock.TextBoxKeyUp;
+                        textBlock._adorner.TextBoxLostFocus += textBlock.TextBoxLostFocus;
+                        */
+                    }
+                    layer.Add(textBlock._adorner);
+                }
+                else
+                {
+                    //Remove the adorner from the adorner layer.
+                    Adorner[] adorners = layer.GetAdorners(textBlock);
+                    if (adorners != null)
+                    {
+                        foreach (Adorner adorner in adorners)
+                        {
+                            if (adorner is EditableTextBlockAdorner)
+                            {
+                                layer.Remove(adorner);
+                            }
+                        }
+                    }
+
+                    //Update the textblock's text binding.
+                    /*
+                    BindingExpression expression = textBlock.GetBindingExpression(TextProperty);
+                    if (null != expression)
+                    {
+                        expression.UpdateTarget();
+                    }
+                    */
+                }
+            }
+        }
+
         private void SelectDir(object sender, MouseButtonEventArgs e)
         {
             Console.WriteLine($"click count: {e.ClickCount}");
@@ -76,6 +129,11 @@ namespace Cairn
                 collectionObject.loadDirs(selected_dir);
                 DirFull.Text = collectionObject.source_dir;
             }
+            /*
+            EditableTextBlock pos = (EditableTextBlock)sender;
+            pos.State = !pos.State;
+            Window_Loaded(sender, e);
+            */
         }
 
         private void dirGoBack(object sender, RoutedEventArgs e)
@@ -104,7 +162,6 @@ namespace Cairn
                 return;
             }
             */
-            Console.WriteLine("IDEMO OTROK MOJ");
             List<string> selected_dirs = new List<string>();
             int x = 0;
             //give all files full path and pass them to newley instantiated DirRightClick object
@@ -112,12 +169,16 @@ namespace Cairn
                 selected_dirs.Add(System.IO.Path.Combine(collectionObject.source_dir,file.DirName));
                 x++;
             }
-            dir_right_click = new DirRightClick(selected_dirs);
+            dir_right_click = new DirRightClick(this, selected_dirs);
             dir_right_click.WindowStartupLocation = WindowStartupLocation.Manual;
             dir_right_click.Left = PointToScreen(Mouse.GetPosition(null)).X;
             dir_right_click.Top = PointToScreen(Mouse.GetPosition(null)).Y;
             dir_right_click.Focus();
             dir_right_click.Show();
+        }
+        public void RenameItemsGetInput()
+        {
+
         }
     }
     public class DirList : ObservableCollection<Dir>, INotifyPropertyChanged
@@ -316,10 +377,12 @@ namespace Cairn
     public class Dir
     {
         public string DirName { get; set; }
+        public bool Edit { get; set; }
 
         public Dir(string dir_name)
         {
             DirName = dir_name;
+            Edit = true;
         }
 
     }

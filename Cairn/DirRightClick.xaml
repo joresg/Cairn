@@ -6,10 +6,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Cairn"
         mc:Ignorable="d"
-        Title="DirRightClick" Height="450" Width="200">
+        Title="DirRightClick" Height="300" Width="200">
     <Grid>
         <ListBox Name="Actions" FontSize="14">
             <TextBlock Text="Copy" MouseLeftButtonUp="FilesCopy"/>
+            <TextBlock Text="Rename" MouseLeftButtonUp="FilesRename"/>
             <TextBlock Text="Delete" MouseLeftButtonUp="FilesDelete"/>
         </ListBox> 
     </Grid>

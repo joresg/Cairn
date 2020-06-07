@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{69538B5B-A538-4F60-9468-EDC64F58812F}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>Cairn</RootNamespace>
     <AssemblyName>Cairn</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -89,6 +89,8 @@
     <Compile Include="DirRightClick.xaml.cs">
       <DependentUpon>DirRightClick.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EditableTextBlock.cs" />
+    <Compile Include="EditableTextBlockAdorner.cs" />
     <Compile Include="FileWatcher.cs" />
     <Compile Include="GridRightClick.xaml.cs">
       <DependentUpon>GridRightClick.xaml</DependentUpon>
@@ -163,5 +165,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

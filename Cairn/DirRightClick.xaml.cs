@@ -18,9 +18,11 @@ namespace Cairn {
     /// Interaction logic for DirRightClick.xaml
     /// </summary>
     public partial class DirRightClick : Window {
+        public MainWindow mw { get; set; }
         public List<string> selected_Dirs {get;set; }
-        public DirRightClick(List<string> selected_dirs) {
+        public DirRightClick(MainWindow main_window, List<string> selected_dirs) {
             InitializeComponent();
+            mw = main_window; 
             selected_Dirs = selected_dirs;
         }
         //can't have two right click windows at the same time
@@ -59,6 +61,55 @@ namespace Cairn {
             Hide(); 
             Close();
 
+        }
+
+        private childItem FindVisualChild<childItem>(DependencyObject obj)
+        where childItem : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(obj, i);
+                if (child != null && child is childItem)
+                {
+                    return (childItem)child;
+                }
+                else
+                {
+                    childItem childOfChild = FindVisualChild<childItem>(child);
+                    if (childOfChild != null)
+                        return childOfChild;
+                }
+            }
+            return null;
+        }
+
+
+        private void FilesRename(object o, EventArgs e)
+        {
+            //go trough all selected files, change the type from TextBlock to something which takes input
+            Console.WriteLine("you need to rename theese items:");
+            //find the file which is flagged to be renamed
+
+            foreach (Cairn.Dir idk in mw.ListDir.SelectedItems)
+            {
+                Console.WriteLine(idk.DirName);
+                //EditableTextBlock item = (EditableTextBlock)mw.ListDir.ItemContainerGenerator.ContainerFromItem(idk);
+                ListBoxItem item = (ListBoxItem)mw.ListDir.ItemContainerGenerator.ContainerFromItem(idk);
+                var neki = item.DataContext;
+                Console.WriteLine($"item:::: {item}");
+                Console.WriteLine($"item:::: {neki}");
+
+                // Getting the ContentPresenter of myListBoxItem
+                ContentPresenter myContentPresenter = FindVisualChild<ContentPresenter>(item);
+
+                // Finding textBlock from the DataTemplate that is set on that ContentPresenter
+                DataTemplate myDataTemplate = myContentPresenter.ContentTemplate;
+                EditableTextBlock myTextBlock = (EditableTextBlock)myDataTemplate.FindName("SubdirName", myContentPresenter);
+                myTextBlock.State = !myTextBlock.State;
+                mw.Window_Loaded(myTextBlock, e);
+            }
+            Hide(); 
+            Close();
         }
         private void FilesPaste(object o, RoutedEventArgs e) {
             //get all files from the structure that holds copied files

@@ -17,10 +17,10 @@
         <ListBox Grid.Row ="1" Name="ListDir" SelectionMode="Extended">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock x:Name="SubdirName" FontSize="14" Text="{Binding DirName}" MouseLeftButtonUp="SelectDir" MouseRightButtonUp="SubdirRightClick"/>
+                    <local:EditableTextBlock State="{Binding Edit, Mode=TwoWay}" x:Name="SubdirName" FontSize="14" Text="{Binding DirName}" MouseLeftButtonUp="SelectDir" MouseRightButtonUp="SubdirRightClick"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <TextBlock Name ="BottomText" FontSize="14" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Bottom text"/>
+        <local:EditableTextBlock x:Name ="BottomText" FontSize="14" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Bottom text"/>
     </Grid>
 </Window>
