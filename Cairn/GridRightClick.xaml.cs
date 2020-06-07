@@ -40,8 +40,12 @@ namespace Cairn {
                 {
                     x++;
                 }
+                System.IO.Directory.CreateDirectory(System.IO.Path.Combine(sourceDir,$"New Folder ({x})"));
             }
-            System.IO.Directory.CreateDirectory(System.IO.Path.Combine(sourceDir,$"New Folder ({x})"));
+            else
+            {
+                System.IO.Directory.CreateDirectory(System.IO.Path.Combine(sourceDir,"New Folder"));
+            }
             Hide();
             Close();
         }
